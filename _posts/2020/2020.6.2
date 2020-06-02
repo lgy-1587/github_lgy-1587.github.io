@@ -1,0 +1,132 @@
+---
+layout: post
+title: 爬虫学习
+category: it
+tags: [it]
+excerpt: 基础部分（1）
+---
+
+## 爬虫学习
+
+### 一. robots.txt协议
+
+规定了网站中可爬取和禁止爬取的数据
+
+### 二.requests模块 
+
+作用：模拟浏览器发送请求。
+
+使用方式：
+
+1. 指定url
+
+2. 发起请求
+
+3. 获取相应数据
+
+4. 持久化存储
+
+   爬取网址源代码：
+
+```python
+import requests
+#指定url
+url = 'https:'
+#发起请求
+#get方法会返回一个响应对象
+response = requests.get(url=url)
+#获取响应数据，text返回的是字符串形式的响应数据
+page_text = response.text
+#持久化存储
+with open('保存路径',w,encoding='utf-8')as fp:
+    fp.write(page_text)
+print('爬取结束')
+```
+
+##### UA伪装：(User-Agent 请求载体的身份标识)
+
+UA检测：门户网站的服务器会检测对应请求的载体身份标识，如果检测到的请求为一款浏览器的，会认定该请求为一个正常请求。如果不是这样，就会拒绝该次请求。
+
+在浏览器的检查中找到User-Agent 后的数据写入代码，进行UA伪装。
+
+```python
+headers = {
+    'User-Agent'=''
+}
+#看情况是第二个传入对象是data还是params
+response = requests.get(url=url,params=param,headers=headers)
+```
+
+##### 查看响应数据所属数据类型
+
+Network -XHR -Headers -Response Headers -Content-type后面的判断类型
+
+若为json类型，则需要json解析
+
+若想爬取二进制数据，如图片，则需要content 进行解析
+
+```python
+result = response.text
+result = response.json()
+result = response.content
+```
+
+
+
+### 三.聚焦爬虫（爬取页面中需要的的指定内容）
+
+自我理解：网页源码是xml文件类型，所以可以使用解析xml文件的方法来解析数据
+
+爬虫数据分析分类：
+
+##### 1. 正则表达式
+
+正则得到的是个list列表对象
+
+```python
+zz = '<div class="">.*?<img src="(.*?)"></div>'
+```
+
+
+
+##### 2. BeautifulSoup
+
+```python
+import requests
+from bs4 import BeautifulSoup
+import lxml  
+tb_res = requests.get(url=url,params=param,headers=headers)
+html= tb_res.text
+soup = BeautifulSoup(html,'lxml')
+```
+
+![image-20200529195939044](D:\学习\爬虫学习.assets\image-20200529195939044.png)
+
+![2](D:\学习\爬虫学习.assets\image-20200530173844163.png)
+
+```python
+for s in soup.select('.p_title >  a '):
+    print (s.text)
+	e = 'https://tieba.baidu.com/'+s['href'] #此处href为网址后缀
+    print(e) 
+```
+
+
+
+##### 3. xpath
+
+实例化etree对象：
+
+```python
+from lxml import etree
+tree = etree.parse('网页源码路径或源码对象')
+tree.xpath('xpath表达式')
+```
+
+xpath表达式举例：
+
+![image-20200530182354927](D:\学习\爬虫学习.assets\image-20200530182354927.png)
+
+![image-20200530182307712](D:\学习\爬虫学习.assets\image-20200530182307712.png)
+
+### 四.
